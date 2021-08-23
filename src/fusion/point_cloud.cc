@@ -1,6 +1,6 @@
 #include "point_cloud.h"
 
-bool GeneratePointCloud(const std::string& data_folder, const std::vector<Problem>& problems) {
+bool GeneratePointCloud(const std::string& data_folder, const std::vector<Problem>& problems, const Options& opt) {
 
     const int num_images = problems.size();
 
@@ -72,8 +72,10 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
                 if (masks[i](r, c) != 1) {
 
                     const float ref_depth = depths[i](r, c);
-                    // const cv::Vec3f ref_normal = RotateNormalToWorld(normals[i](r, c), cameras[i].R);
-                    const cv::Vec3f ref_normal = normals[i](r, c);
+                    cv::Vec3f ref_normal = normals[i](r, c);
+                    if (opt.normal_cam) {
+                        ref_normal = RotateNormalToWorld(ref_normal, cameras[i].R);
+                    }
 
                     if (ref_depth > 0.0)
                     {
@@ -83,7 +85,7 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
                         cv::Vec3f consistent_color = images[i](r, c);
 
                         int num_consistent = 0;
-                        // float dynamic_consistency = 0.0f;
+                        float dynamic_consistency = 0.0f;
 
                         for (int j = 0; j < num_ngb; ++j) {
 
@@ -98,8 +100,10 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
                             if (src_c >= 0 && src_c < src_cols && src_r >= 0 && src_r < src_rows && masks[src_id](src_r, src_c) != 1) 
                             {
                                 const float src_depth = depths[src_id](src_r, src_c);
-                                // const cv::Vec3f src_normal = RotateNormalToWorld(normals[src_id](src_r, src_c), cameras[src_id].R);
-                                const cv::Vec3f src_normal = normals[src_id](src_r, src_c);
+                                cv::Vec3f src_normal = normals[src_id](src_r, src_c);
+                                if (opt.normal_cam) {
+                                    src_normal = RotateNormalToWorld(src_normal, cameras[src_id].R);
+                                }
                                 
                                 if (src_depth > 0.0)
                                 {
@@ -110,27 +114,31 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
                                     const float relative_depth_diff = std::fabs(ref_pix_depth[2] - ref_depth) / ref_depth;
                                     const float angle = std::acos(ref_normal.dot(src_normal));
 
-                                    if (reproj_error < 2.0f && relative_depth_diff < 0.01f && angle < 0.174533f) 
+                                    if (reproj_error < opt.max_error && relative_depth_diff < opt.max_diff && angle < opt.max_angle) 
                                     {
-                                        consistent_point += src_world_point;
-                                        consistent_normal += src_normal;
-                                        consistent_color += images[src_id](src_r, src_c);
+                                        if (!opt.dyn_cons) {
+                                            consistent_point += src_world_point;
+                                            consistent_normal += src_normal;
+                                            consistent_color += images[src_id](src_r, src_c);
+                                        }
 
                                         used_list[j].x = src_c;
                                         used_list[j].y = src_r;
                                         num_consistent++;
-                                        // dynamic_consistency += std::exp(- 200.0 * relative_depth_diff - 10.0 * angle - reproj_error);
+                                        dynamic_consistency += std::exp(- 200.0 * relative_depth_diff - 10.0 * angle - reproj_error);
                                     }
                                 }
                             }
                         }
 
-                        if (num_consistent >= 2) 
-                        // if (num_consistent >= 1 && dynamic_consistency > 0.3 * num_consistent)
+                        if ((!opt.dyn_cons && num_consistent >= opt.min_consistent ||
+                            (opt.dyn_cons && num_consistent >= 1 && dynamic_consistency > 0.3 * num_consistent)))
                         {
-                            consistent_point /= (num_consistent + 1.0f);
-                            consistent_normal /= (num_consistent + 1.0f);
-                            consistent_color /= (num_consistent + 1.0f);
+                            if (!opt.dyn_cons) {
+                                consistent_point /= (num_consistent + 1.0f);
+                                consistent_normal /= (num_consistent + 1.0f);
+                                consistent_color /= (num_consistent + 1.0f);
+                            }
 
                             Point point3D;
                             point3D.x = consistent_point[0];
@@ -157,24 +165,31 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
         }
     }
 
-    // Filtering
-
-    // std::cout << "Filtering the point cloud..." << std::endl;
-
-    // PointCloudPtr point_cloud_filt(new PointCloud);
-    // PointCloudPtr point_cloud_ptr(new PointCloud);
-    // *point_cloud_ptr = point_cloud;
-
-    // pcl::StatisticalOutlierRemoval<Point> sor;
-    // sor.setInputCloud(point_cloud_ptr);
-    // sor.setMeanK(50);
-    // sor.setStddevMulThresh(1.0);
-    // sor.filter(*point_cloud_filt);
-
     std::cout << "Saving the point cloud..." << std::endl;
 
     std::string ply_path = data_folder + "/point_cloud.ply";
     pcl::io::savePLYFileBinary(ply_path, point_cloud);
+
+    // Filtering
+
+    if (opt.filter) {
+        std::cout << "Filtering the point cloud..." << std::endl;
+
+        PointCloudPtr point_cloud_filt(new PointCloud);
+        PointCloudPtr point_cloud_ptr(new PointCloud);
+        *point_cloud_ptr = point_cloud;
+
+        pcl::StatisticalOutlierRemoval<Point> sor;
+        sor.setInputCloud(point_cloud_ptr);
+        sor.setMeanK(50);
+        sor.setStddevMulThresh(1.0);
+        sor.filter(*point_cloud_filt);
+
+        std::cout << "Saving the filtered point cloud..." << std::endl;
+
+        ply_path = data_folder + "/point_cloud_filtered.ply";
+        pcl::io::savePLYFileBinary(ply_path, *point_cloud_filt);
+    }
 
     std::cout << "Done!" << std::endl;
 

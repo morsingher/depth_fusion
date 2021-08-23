@@ -16,6 +16,6 @@ using Point = pcl::PointXYZRGBNormal;
 using PointCloud = pcl::PointCloud<Point>;
 using PointCloudPtr = pcl::PointCloud<Point>::Ptr;
 
-bool GeneratePointCloud(const std::string& data_folder, const std::vector<Problem>& problems);
+bool GeneratePointCloud(const std::string& data_folder, const std::vector<Problem>& problems, const Options& opt);
 
 #endif // POINT_CLOUD_H

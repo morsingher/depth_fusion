@@ -2,8 +2,8 @@
 
 int main(int argc, char** argv) {
 
-    if (argc < 2) {
-        std::cout << "Usage: <executable> data_folder" << std::endl;
+    if (argc < 3) {
+        std::cout << "Usage: <executable> data_folder config_file" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -15,8 +15,14 @@ int main(int argc, char** argv) {
         std::cout << "Failed to read problem list!" << std::endl;
         return EXIT_FAILURE;
     }
+
+    Options opt;
+    if (!ReadOptions(argv[2], opt)) {
+        std::cout << "Failed to read options!" << std::endl;
+        return EXIT_FAILURE;
+    }
     
-    if (!GeneratePointCloud(data_folder, problems)) {
+    if (!GeneratePointCloud(data_folder, problems, opt)) {
         std::cout << "Failed to generate the point cloud!" << std::endl;
         return EXIT_FAILURE;
     }

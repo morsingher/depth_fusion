@@ -40,6 +40,33 @@ std::vector<Problem> ReadProblemList(const std::string& data_folder) {
     return problems;
 }
 
+bool ReadOptions(const char* filename, Options& opt) {
+    
+    FILE* fp = fopen(filename, "r");
+    if (fp == nullptr) {
+        std::cout << "Failed to open configuration: " << filename << std::endl;
+        return false;
+    }
+
+    char read_buffer[65536];
+    rapidjson::FileReadStream is(fp, read_buffer, sizeof(read_buffer)); 
+    rapidjson::Document d;
+    d.ParseStream(is);
+    fclose(fp);
+
+    opt.normal_cam = d["normal_cam"].GetBool();
+    opt.dyn_cons = d["dyn_cons"].GetBool();
+    opt.filter = d["filter"].GetBool();
+
+    opt.min_consistent = d["min_consistent"].GetInt();
+
+    opt.max_error = d["max_error"].GetDouble();
+    opt.max_diff = d["max_diff"].GetDouble();
+    opt.max_angle = d["max_angle"].GetDouble() * M_PI / 180.0;
+
+    return true;
+}
+
 bool ReadCamera(const std::string& filename, Camera& camera) {
 
     std::ifstream file(filename);
