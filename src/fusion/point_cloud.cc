@@ -32,7 +32,7 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
 
         const std::string depth_path = GetFilename(data_folder + "/depth/", ref, ".dmb");
         cv::Mat_<float> depth;
-        if (!ReadBinaryMat(depth_path, depth)) {
+        if (!ReadColmapMat(depth_path, depth)) {
             std::cout << "Failed to read depth: " << depth_path << std::endl;
             return false;
         }
@@ -40,7 +40,7 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
 
         const std::string normal_path = GetFilename(data_folder + "/normal/", ref, ".dmb");
         cv::Mat_<cv::Vec3f> normal;
-        if (!ReadBinaryMat(normal_path, normal)) {
+        if (!ReadColmapMat(normal_path, normal)) {
             std::cout << "Failed to read normal: " << normal_path << std::endl;
             return false;
         }

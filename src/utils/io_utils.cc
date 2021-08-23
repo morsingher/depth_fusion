@@ -125,26 +125,6 @@ void RescaleImageAndCamera(const cv::Mat& src, cv::Mat& dst, Camera &camera, con
     camera.height = new_rows;
 }
 
-bool ReadBinaryMat(const std::string& filename, cv::Mat& mat) {
-
-    std::ifstream fs(filename, std::fstream::binary);
-    if (!fs) {
-        std::cout << "Failed to open: " << filename << std::endl;
-        return false;
-    }
-
-    int rows, cols, type, channels;
-    fs.read(reinterpret_cast<char*>(&rows), sizeof(int));
-    fs.read(reinterpret_cast<char*>(&cols), sizeof(int));
-    fs.read(reinterpret_cast<char*>(&type), sizeof(int));
-    fs.read(reinterpret_cast<char*>(&channels), sizeof(int));
-
-    mat = cv::Mat::zeros(rows, cols, type);
-    fs.read(reinterpret_cast<char*>(mat.data), CV_ELEM_SIZE(type)*rows*cols);
-
-    return true;
-}
-
 bool ReadColmapMat(const std::string& filename, cv::Mat& mat) {
 
     std::fstream text_file(filename, std::ios::in);
