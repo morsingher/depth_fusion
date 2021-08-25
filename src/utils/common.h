@@ -30,7 +30,7 @@
 #include <rapidjson/filereadstream.h>
 
 struct Camera {
-    cv::Mat_<float> K, R, t;
+    float K[9], R[9], t[3];
     int height, width;
 };
 

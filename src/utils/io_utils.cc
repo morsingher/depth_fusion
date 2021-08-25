@@ -78,21 +78,16 @@ bool ReadCamera(const std::string& filename, Camera& camera) {
     std::string line;
     file >> line;
 
-    camera.R = cv::Mat::zeros(3, 3, CV_32FC1);
-    camera.t = cv::Mat::zeros(3, 1, CV_32FC1);
-
     for (int i = 0; i < 3; ++i) {
-        file >> camera.R(i, 0) >> camera.R(i, 1) >> camera.R(i, 2) >> camera.t(i, 0);
+        file >> camera.R[3 * i + 0] >> camera.R[3 * i + 1] >> camera.R[3 * i + 2] >> camera.t[i];
     }
 
     float tmp[4];
     file >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
     file >> line;
 
-    camera.K = cv::Mat::zeros(3, 3, CV_32FC1);
-
     for (int i = 0; i < 3; ++i) {
-        file >> camera.K(i, 0) >> camera.K(i, 1) >> camera.K(i, 2);
+        file >> camera.K[3 * i + 0] >> camera.K[3 * i + 1] >> camera.K[3 * i + 2];
     }
 
     return true;
@@ -117,10 +112,10 @@ void RescaleImageAndCamera(const cv::Mat& src, cv::Mat& dst, Camera &camera, con
     const float scale_x = new_cols / static_cast<float>(src.cols);
     const float scale_y = new_rows / static_cast<float>(src.rows);
 
-    camera.K(0, 0) *= scale_x;
-    camera.K(0, 2) *= scale_x;
-    camera.K(1, 1) *= scale_y;
-    camera.K(1, 2) *= scale_y;
+    camera.K[0] *= scale_x;
+    camera.K[2] *= scale_x;
+    camera.K[4] *= scale_y;
+    camera.K[5] *= scale_y;
     camera.width = new_cols;
     camera.height = new_rows;
 }
