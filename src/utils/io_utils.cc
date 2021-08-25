@@ -57,6 +57,7 @@ bool ReadOptions(const char* filename, Options& opt) {
     opt.normal_cam = d["normal_cam"].GetBool();
     opt.dyn_cons = d["dyn_cons"].GetBool();
     opt.filter = d["filter"].GetBool();
+    opt.refine = d["refine"].GetBool();
 
     opt.min_consistent = d["min_consistent"].GetInt();
 
@@ -120,8 +121,8 @@ void RescaleImageAndCamera(const cv::Mat& src, cv::Mat& dst, Camera &camera, con
     camera.height = new_rows;
 }
 
-bool ReadColmapMat(const std::string& filename, cv::Mat& mat) {
-
+bool ReadColmapMat(const std::string& filename, cv::Mat& mat, bool refine) 
+{
     std::fstream text_file(filename, std::ios::in);
     if (!text_file) {
         std::cout << "Failed to open text: " << filename << std::endl;
@@ -133,6 +134,8 @@ bool ReadColmapMat(const std::string& filename, cv::Mat& mat) {
     text_file >> cols >> dummy >> rows >> dummy >> channels >> dummy;
     std::streampos pos = text_file.tellg();
     text_file.close();
+
+    std::cout << "(" << rows << ", " << cols << ", " << channels << ")" << std::endl;
 
     // Not very nice, I know
 
@@ -148,7 +151,26 @@ bool ReadColmapMat(const std::string& filename, cv::Mat& mat) {
         return false;
     }
     bin_file.seekg(pos);
-    bin_file.read(reinterpret_cast<char*>(mat.data), sizeof(float)*channels*rows*cols);
+
+    if (!refine) 
+    {
+        bin_file.read(reinterpret_cast<char*>(mat.data), sizeof(float)*channels*rows*cols);
+    }
+    else
+    {
+        std::vector<cv::Mat_<float>> tmp(channels);
+        for (int c = 0; c < channels; c++)
+        {
+            tmp[c] = cv::Mat::zeros(rows, cols, CV_32FC1);
+            bin_file.read(reinterpret_cast<char*>(tmp[c].data), sizeof(float)*rows*cols);
+        }
+
+        if (channels == 1) {
+            mat = tmp[0];
+        } else {
+            cv::merge(tmp, mat);
+        }
+    }
 
     return true;
 }

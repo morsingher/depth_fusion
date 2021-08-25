@@ -40,7 +40,7 @@ struct Problem {
 };
 
 struct Options {
-    bool normal_cam, dyn_cons, filter;
+    bool normal_cam, dyn_cons, filter, refine;
     int min_consistent;
     float max_error, max_diff, max_angle;
 };

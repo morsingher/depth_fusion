@@ -30,17 +30,29 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
             return false;
         };
 
-        const std::string depth_path = GetFilename(data_folder + "/depth/", ref, ".dmb");
+        std::string depth_path;
+        if (opt.refine) {
+            depth_path = GetFilename(data_folder + "/depth/", ref, ".dmb");
+        } else {
+            depth_path = GetFilename(data_folder + "/depth_refined/", ref, ".dmb");
+        }
+
         cv::Mat_<float> depth;
-        if (!ReadColmapMat(depth_path, depth)) {
+        if (!ReadColmapMat(depth_path, depth, opt.refine)) {
             std::cout << "Failed to read depth: " << depth_path << std::endl;
             return false;
         }
         depths.push_back(depth);
 
-        const std::string normal_path = GetFilename(data_folder + "/normal/", ref, ".dmb");
+        std::string normal_path;
+        if (opt.refine) {
+            normal_path = GetFilename(data_folder + "/normal/", ref, ".dmb");
+        } else {
+            normal_path = GetFilename(data_folder + "/normal_refined/", ref, ".dmb");
+        }
+
         cv::Mat_<cv::Vec3f> normal;
-        if (!ReadColmapMat(normal_path, normal)) {
+        if (!ReadColmapMat(normal_path, normal, opt.refine)) {
             std::cout << "Failed to read normal: " << normal_path << std::endl;
             return false;
         }
@@ -166,6 +178,7 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
     }
 
     std::cout << "Saving the point cloud..." << std::endl;
+    std::cout << "Number of points: " << point_cloud.points.size() << std::endl;
 
     std::string ply_path = data_folder + "/point_cloud.ply";
     pcl::io::savePLYFileBinary(ply_path, point_cloud);
