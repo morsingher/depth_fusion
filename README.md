@@ -17,6 +17,7 @@ Besides standard parameters (such as the minimum number of consistent neighbors 
 - `normal_cam` must be activated if normals are stored in the camera frame.
 - `dyn_cons` provides a different consistency check.
 - `filter` gives the possibility to save a filtered version of the point cloud, based on the Statistical Outlier Filtering (SOR) method provided by PCL.
+- `refine` must be activated if the output of https://github.com/rossimattia/depth-refinement-and-normal-estimation is used for fusion. This is due to a different way they store the normals in binary.
 
 ### Output Format
 
