@@ -32,9 +32,9 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
 
         std::string depth_path;
         if (opt.refine) {
-            depth_path = GetFilename(data_folder + "/depth/", ref, ".dmb");
-        } else {
             depth_path = GetFilename(data_folder + "/depth_refined/", ref, ".dmb");
+        } else {
+            depth_path = GetFilename(data_folder + "/depth/", ref, ".dmb");
         }
 
         cv::Mat_<float> depth;
@@ -46,9 +46,9 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
 
         std::string normal_path;
         if (opt.refine) {
-            normal_path = GetFilename(data_folder + "/normal/", ref, ".dmb");
-        } else {
             normal_path = GetFilename(data_folder + "/normal_refined/", ref, ".dmb");
+        } else {
+            normal_path = GetFilename(data_folder + "/normal/", ref, ".dmb");
         }
 
         cv::Mat_<cv::Vec3f> normal;

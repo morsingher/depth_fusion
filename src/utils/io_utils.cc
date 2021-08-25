@@ -135,8 +135,6 @@ bool ReadColmapMat(const std::string& filename, cv::Mat& mat, bool refine)
     std::streampos pos = text_file.tellg();
     text_file.close();
 
-    std::cout << "(" << rows << ", " << cols << ", " << channels << ")" << std::endl;
-
     // Not very nice, I know
 
     if (channels == 1) {
