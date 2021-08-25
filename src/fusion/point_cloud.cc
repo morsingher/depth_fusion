@@ -180,7 +180,13 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
     std::cout << "Saving the point cloud..." << std::endl;
     std::cout << "Number of points: " << point_cloud.points.size() << std::endl;
 
-    std::string ply_path = data_folder + "/point_cloud.ply";
+    std::string ply_path;
+    if (opt.refine) {
+        ply_path = data_folder + "/point_cloud_refined.ply";
+    } else {
+        ply_path = data_folder + "/point_cloud.ply";
+    }
+    
     pcl::io::savePLYFileBinary(ply_path, point_cloud);
 
     // Filtering
