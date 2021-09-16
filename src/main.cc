@@ -2,8 +2,8 @@
 
 int main(int argc, char** argv) {
 
-    if (argc < 3) {
-        std::cout << "Usage: <executable> data_folder config_file" << std::endl;
+    if (argc < 4) {
+        std::cout << "Usage: <executable> data_folder config_file refine" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -21,6 +21,10 @@ int main(int argc, char** argv) {
         std::cout << "Failed to read options!" << std::endl;
         return EXIT_FAILURE;
     }
+
+    const int refine = std::atoi(argv[3]);
+    opt.refine = (refine > 0);
+    opt.normal_cam = (refine > 0);
     
     if (!GeneratePointCloud(data_folder, problems, opt)) {
         std::cout << "Failed to generate the point cloud!" << std::endl;

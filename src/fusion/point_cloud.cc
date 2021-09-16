@@ -30,13 +30,7 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
             return false;
         };
 
-        std::string depth_path;
-        if (opt.refine) {
-            depth_path = GetFilename(data_folder + "/depth_refined/", ref, ".dmb");
-        } else {
-            depth_path = GetFilename(data_folder + "/depth/", ref, ".dmb");
-        }
-
+        const std::string depth_path = GetFilename(data_folder + "/depth/", ref, ".dmb");
         cv::Mat_<float> depth;
         if (!ReadColmapMat(depth_path, depth, opt.refine)) {
             std::cout << "Failed to read depth: " << depth_path << std::endl;
@@ -44,13 +38,7 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
         }
         depths.push_back(depth);
 
-        std::string normal_path;
-        if (opt.refine) {
-            normal_path = GetFilename(data_folder + "/normal_refined/", ref, ".dmb");
-        } else {
-            normal_path = GetFilename(data_folder + "/normal/", ref, ".dmb");
-        }
-
+        const std::string normal_path = GetFilename(data_folder + "/normal/", ref, ".dmb");
         cv::Mat_<cv::Vec3f> normal;
         if (!ReadColmapMat(normal_path, normal, opt.refine)) {
             std::cout << "Failed to read normal: " << normal_path << std::endl;
