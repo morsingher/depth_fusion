@@ -58,6 +58,7 @@ bool ReadOptions(const char* filename, Options& opt) {
     opt.dyn_cons = d["dyn_cons"].GetBool();
     opt.filter = d["filter"].GetBool();
     opt.refine = d["refine"].GetBool();
+    opt.crop = d["crop"].GetBool();
 
     opt.min_consistent = d["min_consistent"].GetInt();
 

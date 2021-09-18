@@ -3,6 +3,7 @@
 	"dyn_cons": false,
 	"filter": false,
 	"refine": false,
+	"crop": true,
 	"min_consistent": 2,
 	"max_error": 2.0,
 	"max_diff": 0.01,

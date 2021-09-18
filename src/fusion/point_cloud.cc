@@ -4,6 +4,33 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
 
     const int num_images = problems.size();
 
+    // Read meta file for cropping
+
+    const std::string meta_file = data_folder + std::string("/meta.txt");
+    double x_min, x_max, y_min, y_max, z_min, z_max;
+
+    if (opt.crop)
+    {
+        std::ifstream meta_fs(meta_file, std::ios::in);
+        if (!meta_fs)
+        {
+            std::cout << "Couldn't open meta file: " << meta_file << std::endl;
+            return false;
+        }
+
+        while (!meta_fs.eof() && !meta_fs.bad())
+        {
+            std::string line;
+            std::getline(meta_fs, line);
+            std::istringstream line_s(line);
+
+            if (!line.empty())
+            {
+                line_s >> x_min >> x_max >> y_min >> y_max >> z_min >> z_max;
+            }
+        }
+    }
+
     // Load input data
 
     std::vector<cv::Mat_<cv::Vec3b>> images;
@@ -150,8 +177,19 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
                             point3D.normal_x = consistent_normal[0];
                             point3D.normal_y = consistent_normal[1];
                             point3D.normal_z = consistent_normal[2];
-                            
-                            point_cloud.push_back(point3D);
+
+                            if (!opt.crop)
+                            {
+                                point_cloud.push_back(point3D);
+                            }
+                            else
+                            {
+                                if (point3D.x > x_min && point3D.x < x_max &&
+                                    point3D.y > y_min && point3D.y < y_max)
+                                {
+                                    point_cloud.push_back(point3D);
+                                }
+                            }
 
                             for (int j = 0; j < num_ngb; ++j) {
                                 if (used_list[j].x != -1) {
