@@ -1,11 +1,13 @@
 {
 	"normal_cam": false,
 	"dyn_cons": false,
-	"filter": false,
+	"filter": true,
 	"refine": false,
-	"crop": true,
+	"crop": false,
+	"downsample": true,
 	"min_consistent": 2,
 	"max_error": 2.0,
 	"max_diff": 0.01,
-	"max_angle": 10.0
+	"max_angle": 10.0,
+	"max_depth": 60.0
 }

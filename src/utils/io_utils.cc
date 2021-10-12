@@ -59,12 +59,14 @@ bool ReadOptions(const char* filename, Options& opt) {
     opt.filter = d["filter"].GetBool();
     opt.refine = d["refine"].GetBool();
     opt.crop = d["crop"].GetBool();
+    opt.downsample = d["downsample"].GetBool();
 
     opt.min_consistent = d["min_consistent"].GetInt();
 
     opt.max_error = d["max_error"].GetDouble();
     opt.max_diff = d["max_diff"].GetDouble();
     opt.max_angle = d["max_angle"].GetDouble() * M_PI / 180.0;
+    opt.max_depth = d["max_depth"].GetDouble();
 
     return true;
 }

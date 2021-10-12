@@ -104,7 +104,7 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
                         ref_normal = RotateNormalToWorld(ref_normal, cameras[i].R);
                     }
 
-                    if (ref_depth > 0.0)
+                    if (ref_depth > 0.0 && ref_depth < opt.max_depth)
                     {
                         const cv::Vec3f ref_world_point = Get3DWorldPoint(c, r, ref_depth, cameras[i]);
                         cv::Vec3f consistent_point = ref_world_point;
@@ -231,9 +231,29 @@ bool GeneratePointCloud(const std::string& data_folder, const std::vector<Proble
         sor.filter(*point_cloud_filt);
 
         std::cout << "Saving the filtered point cloud..." << std::endl;
+        std::cout << "Number of points: " << point_cloud_filt->points.size() << std::endl;
 
         ply_path = data_folder + "/point_cloud_filtered.ply";
         pcl::io::savePLYFileBinary(ply_path, *point_cloud_filt);
+    
+        // Downsampling
+
+        if (opt.downsample) {
+            std::cout << "Downsampling the point cloud..." << std::endl;
+
+            PointCloudPtr point_cloud_down(new PointCloud);
+
+            pcl::VoxelGrid<PointCloud> vox;
+            vox.setInputCloud(point_cloud_filt);
+            vox.setLeafSize(0.1f, 0.1f, 0.1f);
+            vox.filter(*point_cloud_down);
+
+            std::cout << "Saving the downsampled point cloud..." << std::endl;
+            std::cout << "Number of points: " << point_cloud_down->points.size() << std::endl;
+
+            ply_path = data_folder + "/point_cloud_downsampled.ply";
+            pcl::io::savePLYFileBinary(ply_path, *point_cloud_down);
+        }
     }
 
     std::cout << "Done!" << std::endl;

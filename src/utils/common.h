@@ -40,9 +40,9 @@ struct Problem {
 };
 
 struct Options {
-    bool normal_cam, dyn_cons, filter, refine, crop;
+    bool normal_cam, dyn_cons, filter, refine, crop, downsample;
     int min_consistent;
-    float max_error, max_diff, max_angle;
+    float max_error, max_diff, max_angle, max_depth;
 };
 
 #endif // COMMON_H
